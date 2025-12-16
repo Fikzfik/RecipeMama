@@ -70,10 +70,18 @@ export default function Home() {
         element?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // Filter recipes based on search
-    const filteredRecipes = recipes.filter((r) =>
-        r.name.toLowerCase().includes(search.toLowerCase())
-    );
+    const [selectedCategory, setSelectedCategory] = useState("All");
+
+    // Filter recipes based on search and category
+    const filteredRecipes = recipes.filter((r) => {
+        const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = selectedCategory === "All" || r.cuisine === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
+    // Get unique categories from recipes, limit to top 8 to avoid clutter if many
+    const categories = ["All", ...Array.from(new Set(recipes.map((r) => r.cuisine))).slice(0, 8)];
+
 
     // State for interactions
     const [isLiked, setIsLiked] = useState(false);
@@ -179,10 +187,10 @@ export default function Home() {
                         <div className="flex-1 relative w-full h-[400px] md:h-[600px] animate-in slide-in-from-right duration-700 delay-200 flex items-center justify-center">
                             <div className="relative w-full h-full">
                                 <Image
-                                    src={heroImage}
+                                    src="/heroo.png"
                                     alt="Hero Food"
                                     fill
-                                    className="object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                                    className="object-contain"
                                     priority
                                 />
                             </div>
@@ -206,17 +214,25 @@ export default function Home() {
 
                     {/* Recipe List Section */}
                     <section id="recipe-list" className="max-w-7xl mx-auto px-6 py-24 bg-white rounded-t-[60px] shadow-[0_-40px_80px_rgba(0,0,0,0.03)] border-t border-gray-50 mt-10 relative z-30">
-                        <div className="flex items-end justify-between mb-12">
+                        <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
                             <div>
                                 <span className="text-orange-500 font-bold tracking-widest text-xs uppercase mb-2 block">Our Collection</span>
                                 <h2 className="text-4xl font-bold text-gray-800">Fresh from the Kitchen</h2>
                             </div>
-                            <button
-                                onClick={() => setSearch("")}
-                                className="hidden md:block px-6 py-3 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all text-sm font-semibold"
-                            >
-                                View All Recipes
-                            </button>
+                            <div className="flex-1 md:flex-none flex flex-wrap gap-2 justify-start md:justify-end">
+                                {categories.map((category) => (
+                                    <button
+                                        key={category}
+                                        onClick={() => setSelectedCategory(category)}
+                                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all border ${selectedCategory === category
+                                            ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-200"
+                                            : "bg-white text-gray-500 border-gray-200 hover:border-orange-200 hover:text-orange-500 hover:bg-orange-50"
+                                            }`}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {loading ? (
